@@ -115,7 +115,7 @@ const CreateABox = () => {
 
             if (asset2.assetType === 0 && asset2.assetAddress !== "" && asset2.assetID !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     asset1.assetAddress,
                     asset1.assetID,
@@ -127,12 +127,14 @@ const CreateABox = () => {
                     expiryTime,
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
+                await tx?.wait();
+
 
             }
 
             if (asset2.assetType === 1 && asset2.assetAddress !== "" && asset2.assetQuantity !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     asset1.assetAddress,
                     asset1.assetID,
@@ -144,13 +146,15 @@ const CreateABox = () => {
                     expiryTime,
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
+                await tx?.wait();
+
 
             }
 
             if (asset2.assetType === 2 && asset2.assetQuantity !== null) {
 
                 try {
-                    await LockTx?.createLockBox(
+                    const tx = await LockTx?.createLockBox(
                         asset1.assetType,
                         asset1.assetAddress,
                         asset1.assetID,
@@ -162,6 +166,9 @@ const CreateABox = () => {
                         expiryTime-1,
                         { value: ethers.utils.parseEther(boxFee.toString()) }
                     )
+
+                    await tx?.wait();
+
 
                 }
                 catch (e:any) {
@@ -176,7 +183,7 @@ const CreateABox = () => {
 
             if (asset2.assetType === 0 && asset2.assetAddress !== "" && asset2.assetID !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     asset1.assetAddress,
                     1,
@@ -189,11 +196,12 @@ const CreateABox = () => {
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
 
+                await tx?.wait();
             }
 
             if (asset2.assetType === 1 && asset2.assetAddress !== "" && asset2.assetQuantity !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     asset1.assetAddress,
                     1,
@@ -206,11 +214,13 @@ const CreateABox = () => {
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
 
+                await tx?.wait();
+
             }
 
             if (asset2.assetType === 2 && asset2.assetQuantity !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     asset1.assetAddress,
                     1,
@@ -222,6 +232,8 @@ const CreateABox = () => {
                     expiryTime,
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
+
+                await tx?.wait();
 
             }
         }
@@ -230,7 +242,7 @@ const CreateABox = () => {
 
             if (asset2.assetType === 0 && asset2.assetAddress !== "" && asset2.assetID !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     NULL_ADDRESS,
                     1,
@@ -243,11 +255,13 @@ const CreateABox = () => {
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
 
+                await tx?.wait();
+
             }
 
             if (asset2.assetType === 1 && asset2.assetAddress !== "" && asset2.assetQuantity !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     NULL_ADDRESS,
                     1,
@@ -260,11 +274,14 @@ const CreateABox = () => {
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
 
+                await tx?.wait();
+
+
             }
 
             if (asset2.assetType === 2 && asset2.assetQuantity !== null) {
 
-                await LockTx?.createLockBox(
+                const tx = await LockTx?.createLockBox(
                     asset1.assetType,
                     NULL_ADDRESS,
                     1,
@@ -276,6 +293,8 @@ const CreateABox = () => {
                     expiryTime,
                     { value: ethers.utils.parseEther(boxFee.toString()) }
                 )
+                await tx?.wait();
+
 
             }
         }
@@ -284,6 +303,9 @@ const CreateABox = () => {
             alert("Provide the LockBox Data please")
         }
 
+        const BoxID = await contractMethods?.counter();
+        alert(`Success, your LockBox ID is ${BoxID}`)
+        
         await fatchBlockChainData();
 
 
