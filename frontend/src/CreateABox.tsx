@@ -355,7 +355,7 @@ const CreateABox = () => {
         let boxFeee2 = ethers.utils.formatEther(boxFeee?.toString())
         setBoxFee(Number(boxFeee2))
 
-        let balance_of_contract = await provider.getBalance("0x28383c75B9975c3F4D740eeE541413fb3B37dF5f");
+        let balance_of_contract = await provider.getBalance(lockBoxAddress);
         let balance_of_contract2 = ethers.utils.formatEther(balance_of_contract)
         setBoxBalance(Number(balance_of_contract2))
 
