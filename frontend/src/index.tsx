@@ -4,6 +4,8 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Mainnet, DAppProvider, useEtherBalance, useEthers, Config } from '@usedapp/core'
+import store from './store/store'
+import { Provider } from 'react-redux';
 
 const config: Config = {
   // readOnlyChainId: Mainnet.chainId,
@@ -16,7 +18,9 @@ const config: Config = {
 ReactDOM.render(
   <React.StrictMode>
     <DAppProvider config={config}>
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
     </DAppProvider>
   </React.StrictMode>,
   document.getElementById('root')

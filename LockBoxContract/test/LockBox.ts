@@ -59,7 +59,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox(
         AssetType.NFT, testNFT.address, 1, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -120,7 +120,7 @@ describe('LockBox Test Stack', () => {
       await expect(lockBox.connect(user1).createLockBox(
         AssetType.NFT, testNFT.address, 1, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.099") }
       )).to.be.reverted;
 
@@ -134,7 +134,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox(
         AssetType.NFT, testNFT.address, 1, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       );
 
@@ -182,7 +182,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -198,7 +198,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -215,7 +215,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -247,7 +247,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -309,7 +309,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -363,7 +363,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -427,7 +427,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -495,7 +495,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -564,7 +564,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -604,21 +604,21 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox(
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
       await lockBox.connect(user2).createLockBox(
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
       await lockBox.connect(user3).createLockBox(
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -674,7 +674,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -708,7 +708,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -750,7 +750,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -790,7 +790,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -848,7 +848,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -881,7 +881,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -926,7 +926,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -986,7 +986,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1049,7 +1049,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.NFT, testNFT2.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1084,7 +1084,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.NFT, testNFT2.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1134,7 +1134,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.NFT, testNFT2.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1191,7 +1191,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.NFT, testNFT.address, 0, 1,
           AssetType.NFT, testNFT2.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1257,7 +1257,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.COIN, NULL_ADDRESS, 1, ethers.utils.parseEther("2"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1291,7 +1291,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.COIN, NULL_ADDRESS, 1, ethers.utils.parseEther("2"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1350,7 +1350,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.COIN, NULL_ADDRESS, 1, ethers.utils.parseEther("2"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1403,7 +1403,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.COIN, NULL_ADDRESS, 1, ethers.utils.parseEther("2"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1467,7 +1467,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.TOKEN, testToken2.address, 0, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1501,7 +1501,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.TOKEN, testToken2.address, 0, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1563,7 +1563,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.TOKEN, testToken2.address, 0, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1621,7 +1621,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("200"),
           AssetType.TOKEN, testToken2.address, 0, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1688,7 +1688,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1721,7 +1721,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1777,7 +1777,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1835,7 +1835,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.TOKEN, testToken.address, 0, ethers.utils.parseEther("100"),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1905,7 +1905,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, ethers.utils.parseEther("1.0"),
           AssetType.TOKEN, testToken.address, 1, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1941,7 +1941,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, ethers.utils.parseEther("1.0"),
           AssetType.TOKEN, testToken.address, 1, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -1999,7 +1999,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, ethers.utils.parseEther("1.0"),
           AssetType.TOKEN, testToken.address, 1, ethers.utils.parseEther("500"),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -2056,7 +2056,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
           AssetType.TOKEN, testToken.address, 1, web3.utils.toWei('500', 'ether'),
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -2124,7 +2124,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -2160,7 +2160,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -2212,7 +2212,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -2265,7 +2265,7 @@ describe('LockBox Test Stack', () => {
         await lockBox.connect(user1).createLockBox(
           AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
           AssetType.NFT, testNFT.address, 0, 1,
-          latestBlock.timestamp + OneDayduration,
+          OneDayduration,
           { value: ethers.utils.parseEther("0.1") }
         )
 
@@ -2328,7 +2328,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
 
@@ -2351,7 +2351,7 @@ describe('LockBox Test Stack', () => {
       await lockBox.connect(user1).createLockBox (
         AssetType.NFT, testNFT.address, 0, 1,
         AssetType.COIN, NULL_ADDRESS, 0, web3.utils.toWei('1', 'ether'),
-        latestBlock.timestamp + OneDayduration,
+        OneDayduration,
         { value: ethers.utils.parseEther("0.1") }
       )
       

@@ -171,7 +171,7 @@ const Header = () => {
                         )
                     }
 
-                    <div> 
+                    <div style={{border: "0px solid black", width: "100px", display: "flex", justifyContent: "end"}}>
                         Count: {nft.count}
                     </div>
 
@@ -206,7 +206,7 @@ const Header = () => {
                             <div><CircularProgress size={16} /></div>
                         )
                     }
-                    <div>
+                    <div style={{border: "0px solid black", width: "100px", display: "flex", justifyContent: "end"}}>
                         Count: {token.count}
                     </div>
 
