@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "D:\\Fiverr\\LockBox\\LockBoxContract\\contracts\\LockBox.sol": {
-      "lastModificationDate": 1643774847393,
-      "contentHash": "646a1a05613d4e953fdced6f560cb5d0",
+      "lastModificationDate": 1643980980529,
+      "contentHash": "5215933f0f950b59e8ebfe673280291e",
       "sourceName": "contracts/LockBox.sol",
       "solcConfig": {
         "version": "0.8.0",
@@ -1087,7 +1087,7 @@
       ]
     },
     "D:\\Fiverr\\LockBox\\LockBoxContract\\contracts\\TestToken.sol": {
-      "lastModificationDate": 1643863338318,
+      "lastModificationDate": 1643980980530,
       "contentHash": "c77e65ec5fb0de2342a18c32eb3db8d0",
       "sourceName": "contracts/TestToken.sol",
       "solcConfig": {
@@ -1124,7 +1124,7 @@
       ]
     },
     "D:\\Fiverr\\LockBox\\LockBoxContract\\contracts\\TestNFT.sol": {
-      "lastModificationDate": 1643863347737,
+      "lastModificationDate": 1643980980530,
       "contentHash": "f32bbe09dde74c8afe8dd478a9556c32",
       "sourceName": "contracts/TestNFT.sol",
       "solcConfig": {

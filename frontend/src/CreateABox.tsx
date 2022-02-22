@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
-import Box from '@mui/material/Box';
+// import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
-import { Button } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import { ethers, Contract } from "ethers";
 import { LockBox } from './typechain';
 import { useEthers } from '@usedapp/core';
+import { useDispatch, useSelector } from 'react-redux';
+import {Asset, Box, createBoxData, DataType} from './store'
 
 // import AdapterDateFns from '@mui/lab/AdapterDateFns';
 // import LocalizationProvider from '@mui/lab/LocalizationProvider';
@@ -22,7 +24,7 @@ const lockboxABI = require("./abis/LockBox.json")
 const lockBoxAddress = "0x5df4d61ee363B7B7528C2eDca37AE476926e21dc";
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-type Asset = {
+type Asset_local = {
     assetType: null | number,
     assetID: null | number,
     assetQuantity: null | number,
@@ -32,24 +34,28 @@ type Asset = {
 
 const CreateABox = () => {
 
+    const dispatch = useDispatch();
+
     const { active, chainId, activateBrowserWallet, account } = useEthers();
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
     const classes = useStyles();
 
-    const [asset1, setAsset1] = useState<Asset>({
+    const [loading, isLoading] = useState(false);
+
+    const [asset1, setAsset1] = useState<Asset_local>({
         assetType: 3,
-        assetID: null,
-        assetQuantity: null,
-        assetAddress: ""
+        assetID: 0,
+        assetQuantity: 0,
+        assetAddress: NULL_ADDRESS
     });
 
-    const [asset2, setAsset2] = useState<Asset>({
+    const [asset2, setAsset2] = useState<Asset_local>({
         assetType: 3,
-        assetID: null,
-        assetQuantity: null,
-        assetAddress: ""
+        assetID: 0,
+        assetQuantity: 0,
+        assetAddress: NULL_ADDRESS
     });
 
     const handleAssest1Change = (e: any, id: "type" | "id" | "quantity" | "address") => {
@@ -96,19 +102,22 @@ const CreateABox = () => {
 
     const handleSubmit = async () => {
 
-        if (!boxFee || contractMethods === null) { return }
+        if (!boxFee) { return }
+
+        isLoading(true);
+
+        const loxkBoxContract = new ethers.Contract(
+            lockBoxAddress,
+            lockboxABI.abi,
+            provider) as LockBox
+
 
         console.log("asset1 => ", asset1.assetType, asset1.assetID, asset1.assetQuantity, asset1.assetAddress)
         console.log("asset2 => ", asset2.assetType, asset2.assetID, asset2.assetQuantity, asset2.assetAddress)
 
         const signer = provider.getSigner()
-        const LockTx = contractMethods?.connect(signer);
-        // let expiryTime = new Date().getTime();
+        const LockTx = loxkBoxContract.connect(signer);
         let expiryTime = 60*60;
-        console.log("expiryTime ", expiryTime)
-        console.log("signer ", signer)
-        console.log("LockTx ", LockTx)
-        console.log("boxFee ", boxFee)
 
 
         if (asset1.assetType === 0 && asset1.assetAddress !== "" && asset1.assetID !== null) {
@@ -300,13 +309,54 @@ const CreateABox = () => {
         }
 
         else {
-            alert("Provide the LockBox Data please")
+            alert("Provide the LockBox Data please");
+            throw("ERROR");
         }
 
-        const BoxID = await contractMethods?.counter();
+        const BoxID = await loxkBoxContract.counter();
         alert(`Success, your LockBox ID is ${BoxID}`)
-        
-        await fatchBlockChainData();
+
+        const boxInfo = await loxkBoxContract.lockBoxInfo(Number(BoxID));
+
+        const assetA: Asset = {
+            assetType: Number(boxInfo.assetA.assetType),
+            owner: boxInfo.assetA.owner,
+            // ownedByYou: account ? boxInfo.assetA.owner === account : false,
+            assetAddress: boxInfo.assetA.assetAddress,
+            assetID: Number(boxInfo.assetA.assetID),
+            assetQuantity: Number(boxInfo.assetA.assetQuantity),
+            lockStatus: Number(boxInfo.assetA.lockStatus),
+            approvalStatus: Number(boxInfo.assetA.approvalStatus),
+            claimStatus: Number(boxInfo.assetA.claimStatus),
+            claimedBy: boxInfo.assetA.claimedBy,
+            boxId: Number(BoxID),
+
+        }
+        const assetB = {
+            assetType: Number(boxInfo.assetB.assetType),
+            owner: boxInfo.assetB.owner,
+            // ownedByYou: account ? boxInfo.assetB.owner === account : false,
+            assetAddress: boxInfo.assetB.assetAddress,
+            assetID: Number(boxInfo.assetB.assetID),
+            assetQuantity: Number(boxInfo.assetB.assetQuantity),
+            lockStatus: Number(boxInfo.assetB.lockStatus),
+            approvalStatus: Number(boxInfo.assetB.approvalStatus),
+            claimStatus: Number(boxInfo.assetB.claimStatus),
+            claimedBy: boxInfo.assetB.claimedBy,
+            boxId: Number(BoxID),
+
+        }
+        const box: Box = {
+            boxId: Number(BoxID),
+            assetA,
+            assetB,
+            expiryTime: Number(boxInfo.expiryTime),
+            lockBoxOwner: boxInfo.lockBoxOwner,
+            status: boxInfo.status
+        }
+
+        dispatch(createBoxData(box))
+        isLoading(false);
 
 
     }
@@ -526,7 +576,11 @@ const CreateABox = () => {
 
             <div className={classes.button}>
                 <Button onClick={handleSubmit} type="submit" variant="contained" sx={{ borderRadius: 0 }}>
-                    Create A Box
+                    {
+                        loading ? 
+                        <> Creating A Box <CircularProgress size={20} sx={{color: "white", marginLeft: "10px"}}/> </> :
+                        "Create A Box"
+                    }
                 </Button>
             </div>
 

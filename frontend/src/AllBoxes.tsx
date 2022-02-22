@@ -3,37 +3,40 @@ import { makeStyles } from '@mui/styles';
 import { ethers, Contract } from "ethers";
 import { LockBox } from './typechain';
 import { useEthers, shortenAddress } from '@usedapp/core'
-import { Box, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
 import { LockBoxTestNFT, LockBoxTestTokens } from './typechain';
 import Chip from '@mui/material/Chip';
 import { OnlinePredictionSharp } from '@mui/icons-material';
 import Countdown from 'react-countdown';
+import { useDispatch, useSelector } from 'react-redux';
+import {Asset, Box, addBoxData, DataType, setLockerMasterMethods, updateLockedAsset, updateApprovedAsset, updateClaimedAsset} from './store'
+
 
 const lockboxABI = require("./abis/LockBox.json");
 
-type Asset = {
-    assetType: number,
-    owner: string,
-    // ownedByYou: boolean,
-    assetAddress: string,
-    assetID: number,
-    assetQuantity: number,
-    lockStatus: number,
-    approvalStatus: number,
-    claimStatus: number,
-    claimedBy: string,
-    boxId: number
-}
+// type Asset = {
+//     assetType: number,
+//     owner: string,
+//     // ownedByYou: boolean,
+//     assetAddress: string,
+//     assetID: number,
+//     assetQuantity: number,
+//     lockStatus: number,
+//     approvalStatus: number,
+//     claimStatus: number,
+//     claimedBy: string,
+//     boxId: number
+// }
 
-type Box = {
-    boxId: number,
-    assetA: Asset,
-    assetB: Asset,
-    expiryTime: number,
-    lockBoxOwner: string,
-    status: number
-}
+// type Box = {
+//     boxId: number,
+//     assetA: Asset,
+//     assetB: Asset,
+//     expiryTime: number,
+//     lockBoxOwner: string,
+//     status: number
+// }
 
 const lockBoxAddress = "0x5df4d61ee363B7B7528C2eDca37AE476926e21dc";
 const TestNFT = require("./abis/LockBoxTestNFT.json");
@@ -41,17 +44,19 @@ const TestToken = require("./abis/LockBoxTestTokens.json");
 
 
 const AllBoxes = () => {
+    const dispatch = useDispatch();
+    const { lockBoxData , masterContracts} = useSelector((state: DataType) => state);
+    
+    console.log("lockBoxData ", lockBoxData)
+    
     const classes = useStyles();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const { active, chainId, activateBrowserWallet, account } = useEthers();
 
     useEffect(() => {
+        console.log("trying   ")
         fatchBlockChainData();
     }, [])
-
-    const [contractMethods, setContractMethods] = useState<LockBox | null>()
-    const [allBoxed, setAllBoxed] = useState<Box[] | null>()
-    // console.log(allBoxed);
 
     const fatchBlockChainData = async () => {
         const loxkBoxContract = new ethers.Contract(
@@ -59,8 +64,10 @@ const AllBoxes = () => {
             lockboxABI.abi,
             provider) as LockBox
 
-        setAllBoxed(null)
-        setContractMethods(loxkBoxContract)
+        dispatch(addBoxData(null));
+        dispatch(setLockerMasterMethods(loxkBoxContract));        
+
+        setLockerMasterMethods
         let boxes = Number(await loxkBoxContract.counter());
         console.log("boxes", boxes)
 
@@ -105,7 +112,7 @@ const AllBoxes = () => {
                 status: boxInfo.status
             }
 
-            setAllBoxed(pre => pre ? [...pre, box] : [box]);
+            dispatch(addBoxData(box))
 
         }
 
@@ -215,17 +222,31 @@ const AllBoxes = () => {
         alert("canceling the box")
     }
 
+    const getBoxStatus = (status: number) => {
+        if(status === 0){
+            // return "InProgress";
+            return <Chip label="InProgress" sx={{ bgcolor: "#c1cfc4", height: "16px", fontSize: 10 }} />
+        }
+        else if(status === 1){
+            // return "Successful";
+            return <Chip label="Successful" sx={{ bgcolor: "#5ff077", height: "16px", fontSize: 10 }} />
+        }
+        else if(status === 2) {
+            // return "Failed"
+            return <Chip label="Unsuccessful" sx={{ bgcolor: "#f54646", height: "16px", fontSize: 10 }} />
+        }
+    }
     // const approveToLocker = async (asset: Asset) => {
 
 
     // }
 
-    const lockAsset = async (asset: Asset) => {
+    const lockAsset = async (boxID: number, type: "A"|"B", asset: Asset) => {
+        
         const signer = provider.getSigner()
-        const LockTx = contractMethods?.connect(signer);
+        const LockTx = masterContracts.lockBoxMethods?.connect(signer);
 
         const assetType = Number(asset.assetType);
-        // console.log(asset)
 
         if (assetType === 0 && account) {
             const NFTContract = new ethers.Contract(asset.assetAddress, TestNFT.abi, provider) as LockBoxTestNFT
@@ -243,6 +264,9 @@ const AllBoxes = () => {
                             const tx2 = await LockTx?.lockAsset(asset.boxId);
                             const reciept2 = await tx2?.wait();
                             console.log("reciept2 ", reciept2)
+                            dispatch(updateLockedAsset({boxID, type, asset }))
+
+
                         }
                         catch (e: any) {
                             alert(e.data.message)
@@ -261,6 +285,8 @@ const AllBoxes = () => {
                     const tx2 = await LockTx?.lockAsset(asset.boxId);
                     const reciept2 = await tx2?.wait();
                     console.log("reciept2 ", reciept2)
+                    dispatch(updateLockedAsset({boxID, type, asset }))
+
                 }
                 catch (e: any) {
                     alert(e.data.message)
@@ -285,7 +311,9 @@ const AllBoxes = () => {
                         try {
                             const tx2 = await LockTx?.lockAsset(asset.boxId);
                             const reciept2 = await tx2?.wait();
-                            console.log("reciept2 ", reciept2)
+                            console.log("reciept2 ", reciept2);
+                            dispatch(updateLockedAsset({boxID, type, asset }))
+
                         }
                         catch (e: any) {
                             console.log(e)
@@ -305,7 +333,9 @@ const AllBoxes = () => {
                 try {
                     const tx2 = await LockTx?.lockAsset(asset.boxId);
                     const reciept2 = await tx2?.wait();
-                    console.log("reciept2 ", reciept2)
+                    console.log("reciept2 ", reciept2);
+                    dispatch(updateLockedAsset({boxID, type, asset }))
+
                 }
                 catch (e: any) {
                     alert(e.data.message)
@@ -321,6 +351,8 @@ const AllBoxes = () => {
                 const tx = await LockTx?.lockAsset(asset.boxId, option)
                 const reciept = await tx?.wait()
                 console.log(reciept)
+                dispatch(updateLockedAsset({boxID, type, asset }))
+
             }
             catch (e: any) {
                 alert(e.data.message)
@@ -328,33 +360,39 @@ const AllBoxes = () => {
             }
         }
 
+        // fatchBlockChainData();
+
     }
 
-    const approveAsset = async (asset: Asset) => {
+    const approveAsset = async (boxID: number, type: "A"|"B", asset: Asset) => {
         const signer = provider.getSigner()
-        const LockTx = contractMethods?.connect(signer);
+        const LockTx = masterContracts.lockBoxMethods?.connect(signer);
 
         try {
             // const option = {value: asset.assetQuantity.toString()}
             const tx = await LockTx?.approveAsset(asset.boxId)
             const reciept = await tx?.wait()
             console.log(reciept)
+            dispatch(updateApprovedAsset({boxID, type, asset }))
         }
         catch (e: any) {
             alert(e.data.message)
             // console.log(e)
         }
 
+
     }
 
-    const claimAsset = async (asset: Asset) => {
+    const claimAsset = async (boxID: number, type: "A"|"B", asset: Asset) => {
         const signer = provider.getSigner()
-        const LockTx = contractMethods?.connect(signer);
+        const LockTx = masterContracts.lockBoxMethods?.connect(signer);
 
         try {
             const tx = await LockTx?.claimAsset(asset.boxId)
             const reciept = await tx?.wait()
-            console.log(reciept)
+            console.log(reciept);
+            dispatch(updateClaimedAsset({boxID, type, asset }))
+
         }
         catch (e: any) {
             alert(e.data.message)
@@ -371,13 +409,13 @@ const AllBoxes = () => {
             </div>
 
             {
-                allBoxed && allBoxed.map((box) => {
+                lockBoxData && lockBoxData.map((box) => {
                     return (
                         <div key={box.boxId} className={classes.box}>
 
                             <div className={classes.boxheader}>
                                 <div> Box ID: {box.boxId} </div>
-                                <div> Status: {box.status} </div>
+                                <div> Status: {getBoxStatus(box.status)} </div>
                                 <div> Owner: {shortenAddress(box.lockBoxOwner)} </div>
                                 <div> Expiry time: {getTime(box.expiryTime)} </div>
                             </div>
@@ -473,7 +511,7 @@ const AllBoxes = () => {
                                             box.assetA.lockStatus === 0 && box.assetA.approvalStatus === 0 && box.assetA.claimStatus === 0 ?
                                                 <div className={classes.controls}>
                                                     <Button
-                                                        onClick={() => lockAsset(box.assetA)}
+                                                        onClick={() => lockAsset(box.boxId, "A", box.assetA)}
                                                         size="small"
                                                         variant='contained'
                                                         sx={{ borderRadius: 0 }}
@@ -485,7 +523,7 @@ const AllBoxes = () => {
                                                     <div className={classes.controls}>
                                                         {/* <Button size="small" variant='contained' sx={{ borderRadius: 0 }}> Approve </Button> */}
                                                         <Button
-                                                            onClick={() => approveAsset(box.assetA)}
+                                                            onClick={() => approveAsset(box.boxId, "A", box.assetA)}
                                                             size="small"
                                                             variant='contained'
                                                             sx={{ borderRadius: 0 }}
@@ -497,7 +535,7 @@ const AllBoxes = () => {
                                                         <div className={classes.controls}>
                                                             {/* <Button size="small" variant='contained' sx={{ borderRadius: 0 }}> Claim </Button> */}
                                                             <Button
-                                                                onClick={() => claimAsset(box.assetA)}
+                                                                onClick={() => claimAsset(box.boxId, "A", box.assetA)}
                                                                 size="small"
                                                                 variant='contained'
                                                                 sx={{ borderRadius: 0 }}
@@ -605,7 +643,7 @@ const AllBoxes = () => {
                                                     {/* <Button size="small" variant='contained' sx={{ borderRadius: 0, marginRight: "10px" }}> Approve </Button> */}
                                                     {/* <Button size="small" variant='contained' sx={{ borderRadius: 0 }}> Lock </Button> */}
                                                     <Button
-                                                        onClick={() => lockAsset(box.assetB)}
+                                                        onClick={() => lockAsset(box.boxId, "B", box.assetB)}
                                                         size="small"
                                                         variant='contained'
                                                         sx={{ borderRadius: 0 }}
@@ -616,7 +654,7 @@ const AllBoxes = () => {
                                                 box.assetB.lockStatus === 1 && box.assetB.approvalStatus === 0 && box.assetB.claimStatus === 0 ?
                                                     <div className={classes.controls}>
                                                         <Button
-                                                            onClick={() => approveAsset(box.assetB)}
+                                                            onClick={() => approveAsset(box.boxId, "B", box.assetB)}
                                                             size="small"
                                                             variant='contained'
                                                             sx={{ borderRadius: 0 }}
@@ -627,7 +665,7 @@ const AllBoxes = () => {
                                                     box.assetB.lockStatus === 1 && box.assetB.approvalStatus === 1 && box.assetB.claimStatus === 0 ?
                                                         <div className={classes.controls}>
                                                             <Button
-                                                                onClick={() => claimAsset(box.assetB)}
+                                                                onClick={() => claimAsset(box.boxId, "B", box.assetB)}
                                                                 size="small"
                                                                 variant='contained'
                                                                 sx={{ borderRadius: 0 }}
