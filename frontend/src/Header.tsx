@@ -5,8 +5,12 @@ import { Button } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Tooltip from '@mui/material/Tooltip';
 import { ethers, Contract } from "ethers";
-import { LockBoxTestNFT, LockBoxTestTokens } from './typechain';
+import { LockBoxTestNFT, LockBoxTestTokens, TestERC1155 as LockBoxTestERC1155 } from './typechain';
 import CircularProgress from '@mui/material/CircularProgress';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 
 const TestNFT = require("./abis/LockBoxTestNFT.json");
@@ -15,6 +19,8 @@ const NFTaddress = "0x5B508eB6e1540b3d48FE6cCa2f8394777547a019";
 const TestToken = require("./abis/LockBoxTestTokens.json");
 const TokenAddress = "0x566648603858016A5BE336aFb3f41E20EB8511D4";
 
+const TestERC1155 = require("./abis/TestERC1155.json");
+const ERC1155Address = "0x185992243E59539Baa2C995e79bfEAB669BC95ed";
 
 type NFT = {
     count: string;
@@ -30,6 +36,12 @@ type TOKEN = {
 
 }
 
+type ERC1155 = {
+    id: number,
+    contract: null | LockBoxTestERC1155;
+    minting: boolean
+
+}
 const Header = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -47,7 +59,21 @@ const Header = () => {
         minting: false
     })
 
-    console.log("chainId ", chainId)
+    const [erc1155, setERC1155] = useState<ERC1155>({
+        id: 1,
+        contract: null,
+        minting: false
+    })
+
+    const setID = (id: string) => {
+        setERC1155({
+            id: Number(id),
+            contract: erc1155.contract,
+            minting: erc1155.minting
+        })
+    }
+
+    // console.log("chainId ", chainId)
 
     useEffect(() => {
         activateBrowserWallet();
@@ -66,7 +92,6 @@ const Header = () => {
         })
 
         const TokenContract = new ethers.Contract(TokenAddress, TestToken.abi, provider) as LockBoxTestTokens
-        // console.log("totalSupply of Tokens", Number( await TokenContract.totalSupply() ))
         const supply = await TokenContract.totalSupply();
 
         setToken({
@@ -75,13 +100,20 @@ const Header = () => {
             minting: false
         })
 
-        // console.log("NFTContract ", NFTContract)
+        const TokenERC1155 = new ethers.Contract(ERC1155Address, TestERC1155.abi, provider) as LockBoxTestERC1155
+        setERC1155({
+            id: 1,
+            contract: TokenERC1155,
+            minting: false
+        })
+
+        console.log("erc1155 methods: ", TokenERC1155);
 
     }
 
 
 
-    const mint = async (id: "ERC721" | "ERC20") => {
+    const mint = async (id: "ERC721" | "ERC20" | "ERC1155") => {
         const signer = provider.getSigner()
 
         if (!account) {
@@ -134,6 +166,31 @@ const Header = () => {
 
 
         }
+        else if (id === "ERC1155" && account) {
+
+            console.log("minting ERC1155 Token")
+            const MintTx = erc1155.contract?.connect(signer);
+            const tx = await MintTx?.mint(erc1155.id, 1);
+            setERC1155({
+                id: erc1155.id,
+                contract: erc1155.contract,
+                minting: true
+            })
+
+            await tx?.wait();
+            // const tokenid = String(await token.contract?.totalSupply());
+
+            alert(`Successfully minted. Your token ID is ${erc1155.id}`);
+
+            setERC1155({
+                id: erc1155.id,
+                contract: erc1155.contract,
+                minting: false
+            })
+
+
+        }
+
     }
 
 
@@ -171,8 +228,53 @@ const Header = () => {
                         )
                     }
 
-                    <div style={{border: "0px solid black", width: "100px", display: "flex", justifyContent: "end"}}>
+                    <div style={{ border: "0px solid black", width: "100px", display: "flex", justifyContent: "end" }}>
                         Count: {nft.count}
+                    </div>
+
+                </div>
+
+                <div className={classes.mintingToken}>
+
+                    <div style={{ border: "0px solid black", display: "flex", alignItems: "center" }}>
+                        <Tooltip title="Check on Bincance scan">
+                            <a href='https://testnet.bscscan.com/address/0x185992243E59539Baa2C995e79bfEAB669BC95ed' target="_blank">
+                                <img
+                                    src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                                    alt="EtherScan"
+                                    width="30px"
+                                    height="30px"
+                                />
+                            </a>
+                        </Tooltip>
+
+                        <Tooltip title="Copy token address">
+                            <ContentCopyIcon
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => { navigator.clipboard.writeText("0x185992243E59539Baa2C995e79bfEAB669BC95ed") }}
+                            />
+                        </Tooltip>
+                    </div>
+
+                    <Button onClick={() => mint("ERC1155")} variant='contained' size='small' sx={{ borderRadius: 0, width: "180px" }}> Mint ERC1155 Token </Button>
+
+                    {
+                        erc1155.minting && (
+                            <div><CircularProgress size={16} /></div>
+                        )
+                    }
+
+                    <div style={{ border: "0px solid black", width: "100px", display: "flex", justifyContent: "end", alignItems: "center" }}>
+                        <label>id:</label>
+                        <select value={erc1155.id} onChange={(e)=> setID(e.target.value)} name="id" style={{ width: "50px", height: "20px", marginLeft: "5px" }}>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+
+
                     </div>
 
                 </div>
@@ -206,7 +308,7 @@ const Header = () => {
                             <div><CircularProgress size={16} /></div>
                         )
                     }
-                    <div style={{border: "0px solid black", width: "100px", display: "flex", justifyContent: "end"}}>
+                    <div style={{ border: "0px solid black", width: "100px", display: "flex", justifyContent: "end" }}>
                         Count: {token.count}
                     </div>
 
@@ -242,7 +344,7 @@ const useStyles = makeStyles({
     root: {
     },
     header: {
-        height: "50px",
+        height: "80px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
