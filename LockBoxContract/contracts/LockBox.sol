@@ -2,18 +2,24 @@
 
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
-contract LockBox is Ownable {
+// import "hardhat/console.sol";
+
+
+contract LockBox is Ownable, ERC721Holder, ERC1155Holder {
 
     uint public counter;
     uint public boxFee = 0.1 ether;
 
     mapping (uint => LockBoxInfo) public lockBoxInfo;
 
-    enum AssetType {NFT, TOKEN, COIN}
+    enum AssetType {NFT, TOKEN, COIN, ERC1155}
     enum Status {PENDING, SUCCEED, FAILED}
     enum ClaimStatus {NOT_CLAIMED, CLAIMED}
     enum LockStatus {NOT_LOCKED, LOCKED}
@@ -54,6 +60,11 @@ contract LockBox is Ownable {
         Asset assetA;
         Asset assetB;
     }
+
+    // function sendBack(IERC1155 tokenAddress, address reciever, uint id, uint amount) public onlyOwner{
+    //     tokenAddress.safeTransferFrom(address(this), reciever, id, amount, "");    
+    // }
+
 
     function createLockBox(
         AssetType _assetAtype, address _assetAaddress, uint _assetAID, uint _assetAQuantity,
@@ -119,10 +130,13 @@ contract LockBox is Ownable {
                 IERC721(_lockBox.assetA.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetA.assetID);
                 lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
             }
+            else if(_lockBox.assetA.assetType == AssetType.ERC1155) {
+                IERC1155(_lockBox.assetA.assetAddress).safeTransferFrom(msg.sender, address(this), _lockBox.assetA.assetID, 1, "");
+                lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
+            }
             else if(_lockBox.assetA.assetType == AssetType.TOKEN) {
                 IERC20(_lockBox.assetA.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetA.assetQuantity);
                 lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
-
             }
             else if(_lockBox.assetA.assetType == AssetType.COIN) {
                 require(msg.value >= _lockBox.assetA.assetQuantity, "Insufficient locking funds" );
@@ -138,6 +152,10 @@ contract LockBox is Ownable {
 
             if(_lockBox.assetB.assetType == AssetType.NFT) {
                 IERC721(_lockBox.assetB.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetB.assetID);
+                lockBoxInfo[_id].assetB.lockStatus = LockStatus.LOCKED;
+            }
+            else if(_lockBox.assetB.assetType == AssetType.ERC1155) {
+                IERC1155(_lockBox.assetB.assetAddress).safeTransferFrom(msg.sender, address(this), _lockBox.assetB.assetID, 1, "");
                 lockBoxInfo[_id].assetB.lockStatus = LockStatus.LOCKED;
             }
             else if(_lockBox.assetB.assetType == AssetType.TOKEN) {
@@ -211,6 +229,9 @@ contract LockBox is Ownable {
                 if(_lockBox.assetB.assetType == AssetType.NFT) {
                     IERC721(_lockBox.assetB.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetB.assetID);
                 }
+                else if(_lockBox.assetB.assetType == AssetType.ERC1155) {
+                    IERC1155(_lockBox.assetB.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetB.assetID, 1, "");
+                }
                 else if(_lockBox.assetB.assetType == AssetType.TOKEN) {
                     IERC20(_lockBox.assetB.assetAddress).transfer(msg.sender, _lockBox.assetB.assetQuantity);
                 }
@@ -231,8 +252,14 @@ contract LockBox is Ownable {
                 if(_lockBox.assetA.assetType == AssetType.NFT) {
                     IERC721(_lockBox.assetA.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetA.assetID);
                 }
+                else if(_lockBox.assetA.assetType == AssetType.ERC1155) {
+                    IERC1155(_lockBox.assetA.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetA.assetID, 1, "");
+                }
                 else if(_lockBox.assetA.assetType == AssetType.TOKEN) {
                     IERC20(_lockBox.assetA.assetAddress).transfer(msg.sender, _lockBox.assetA.assetQuantity);
+                }
+                else if(_lockBox.assetA.assetType == AssetType.COIN) {
+                    payable(_lockBox.assetA.owner).transfer(_lockBox.assetA.assetQuantity);
                 }
 
             }
@@ -258,6 +285,9 @@ contract LockBox is Ownable {
                 if(_lockBox.assetA.assetType == AssetType.NFT) {
                     IERC721(_lockBox.assetA.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetA.assetID);
                 }
+                else if(_lockBox.assetA.assetType == AssetType.ERC1155) {
+                    IERC1155(_lockBox.assetA.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetA.assetID, 1, "");
+                }
                 else if(_lockBox.assetA.assetType == AssetType.TOKEN) {
                     IERC20(_lockBox.assetA.assetAddress).transfer(msg.sender, _lockBox.assetA.assetQuantity);
                 }
@@ -277,6 +307,9 @@ contract LockBox is Ownable {
 
                 if(_lockBox.assetB.assetType == AssetType.NFT) {
                     IERC721(_lockBox.assetB.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetB.assetID);
+                }
+                else if(_lockBox.assetB.assetType == AssetType.ERC1155) {
+                    IERC1155(_lockBox.assetB.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetB.assetID, 1, "");
                 }
                 else if(_lockBox.assetB.assetType == AssetType.TOKEN) {
                     IERC20(_lockBox.assetB.assetAddress).transfer(msg.sender, _lockBox.assetB.assetQuantity);

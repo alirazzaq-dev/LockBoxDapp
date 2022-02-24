@@ -5,7 +5,7 @@ import { LockBox } from './typechain';
 import { useEthers, shortenAddress } from '@usedapp/core'
 import { Button } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
-import { LockBoxTestNFT, LockBoxTestTokens } from './typechain';
+import { LockBoxTestNFT, LockBoxTestTokens, TestERC1155 } from './typechain';
 import Chip from '@mui/material/Chip';
 import { OnlinePredictionSharp } from '@mui/icons-material';
 import Countdown from 'react-countdown';
@@ -38,9 +38,10 @@ const lockboxABI = require("./abis/LockBox.json");
 //     status: number
 // }
 
-const lockBoxAddress = "0x5df4d61ee363B7B7528C2eDca37AE476926e21dc";
+const lockBoxAddress = "0x1048b143c05eE8218Ed9954C23b15436073Ec694";
 const TestNFT = require("./abis/LockBoxTestNFT.json");
 const TestToken = require("./abis/LockBoxTestTokens.json");
+const ERC1155Token = require("./abis/TestERC1155.json");
 
 
 const AllBoxes = () => {
@@ -48,6 +49,7 @@ const AllBoxes = () => {
     const { lockBoxData , masterContracts} = useSelector((state: DataType) => state);
     
     console.log("lockBoxData ", lockBoxData)
+    console.log("masterContracts ", masterContracts)
     
     const classes = useStyles();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -151,6 +153,9 @@ const AllBoxes = () => {
         else if (type === 1) {
             return "ERC20"
         }
+        else if (type === 3) {
+            return "ERC1155"
+        }
         else if (type === 2) {
             return "Ethers"
         }
@@ -209,6 +214,9 @@ const AllBoxes = () => {
         }
         else if (type === 1) {
             return `${ethers.utils.formatEther(quantity.toString())} Tokens`
+        }
+        else if (type === 3) {
+            return quantity.toString()
         }
         else if (type === 2) {
             return `${ethers.utils.formatEther(quantity.toString())} ETH`
@@ -345,6 +353,59 @@ const AllBoxes = () => {
 
         }
 
+        else if (assetType === 3 && account) {
+            const ERC1155Contract = new ethers.Contract(asset.assetAddress, ERC1155Token.abi, provider) as TestERC1155
+            // console.log("ERC1155 Contract ", ERC1155Contract)
+            // console.log("ERC1155 asset.assetAddress ", asset.assetAddress)
+            // console.log("ERC1155 account ", account)
+            // console.log("ERC1155 lockBoxAddress ", lockBoxAddress)
+            const isApprovedForAll = await ERC1155Contract.isApprovedForAll(account, lockBoxAddress);
+            // console.log("ERC1155 isApprovedForAll", isApprovedForAll)
+
+            if (!isApprovedForAll) {
+                const confirmation = window.confirm("You have to approve this asset so lockbox can transfer its ownership")
+                if (confirmation) {
+                    const ArrpveTx = ERC1155Contract?.connect(signer);
+                    try {
+                        const tx = await ArrpveTx.setApprovalForAll(lockBoxAddress, true);
+                        await tx.wait();
+
+                        try {
+                            const tx2 = await LockTx?.lockAsset(asset.boxId);
+                            const reciept2 = await tx2?.wait();
+                            console.log("reciept2 ", reciept2)
+                            dispatch(updateLockedAsset({boxID, type, asset }))
+
+
+                        }
+                        catch (e: any) {
+                            console.log(e.data.message)
+                            alert(e.data.message)
+                        }
+                    }
+                    catch (e: any) {
+                        alert(e.data.message)
+                    }
+
+                }
+
+            }
+
+            else if (isApprovedForAll) {
+                try {
+                    const tx2 = await LockTx?.lockAsset(asset.boxId);
+                    const reciept2 = await tx2?.wait();
+                    console.log("reciept2 ", reciept2)
+                    dispatch(updateLockedAsset({boxID, type, asset }))
+
+                }
+                catch (e: any) {
+                    alert(e.data.message)
+                }
+
+            }
+        }
+
         else if (assetType === 2 && account) {
             try {
                 const option = { value: asset.assetQuantity.toString() }
@@ -359,7 +420,7 @@ const AllBoxes = () => {
                 // console.log(e)
             }
         }
-
+        
         // fatchBlockChainData();
 
     }
