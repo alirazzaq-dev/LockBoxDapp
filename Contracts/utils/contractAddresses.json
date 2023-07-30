@@ -1,0 +1,16 @@
+{
+    "31337": {
+        "LockBox": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "TestERC1155": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "TestNFT": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "TestToken": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "chainId": 31337
+    },
+    "11155111": {
+        "LockBox": "0xe4462Bbfe39cC56f7870f4876907404fe64f5CA2",
+        "TestERC1155": "0x8F499a7166B650B7599bEB2E34A1bD56A433f7A8",
+        "TestNFT": "0xEeB98D7C4F91C6A5Cdc67C8B66c75F6da19E6Ef7",
+        "TestToken": "0x6f1bC2F38884EC425965e9E5aB6f33738535216f",
+        "chainId": 11155111
+    }
+}

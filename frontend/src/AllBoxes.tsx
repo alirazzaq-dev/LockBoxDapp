@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { LockBoxTestNFT, LockBoxTestTokens, TestERC1155 } from './typechain';
 import Chip from '@mui/material/Chip';
 import { OnlinePredictionSharp } from '@mui/icons-material';
-import Countdown from 'react-countdown';
+// import Countdown from 'react-countdown';
 import { useDispatch, useSelector } from 'react-redux';
 import {Asset, Box, addBoxData, DataType, setLockerMasterMethods, updateLockedAsset, updateApprovedAsset, updateClaimedAsset} from './store'
 
@@ -138,10 +138,11 @@ const AllBoxes = () => {
         // console.log("Date ", new Date(time * 1000).getTime())
         // console.log("Date ", Date.now())
         return (
-            <Countdown
-                date={new Date(time * 1000).getTime()}
-                renderer={renderer}
-            />
+            <div />
+            // <Countdown
+            //     date={new Date(time * 1000).getTime()}
+            //     renderer={renderer}
+            // />
         )
 
     }

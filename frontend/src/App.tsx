@@ -19,10 +19,10 @@ function App() {
       <div className={classes.header}> Welcome to Lock Box </div>
       <div className={classes.container}>
         <div className={classes.createABox}>
-          <CreateABox />
+          {/* <CreateABox /> */}
         </div>
         <div className={classes.allBoxes}>
-          <AllBoxes />
+          {/* <AllBoxes /> */}
         </div>
       </div>
 

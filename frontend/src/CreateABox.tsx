@@ -13,6 +13,7 @@ import { LockBox } from './typechain';
 import { useEthers } from '@usedapp/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { Asset, Box, createBoxData, DataType } from './store'
+import  lockboxABI from "./abis/LockBox.json";
 
 // import AdapterDateFns from '@mui/lab/AdapterDateFns';
 // import LocalizationProvider from '@mui/lab/LocalizationProvider';
@@ -20,7 +21,6 @@ import { Asset, Box, createBoxData, DataType } from './store'
 
 
 
-const lockboxABI = require("./abis/LockBox.json")
 const lockBoxAddress = "0x1048b143c05eE8218Ed9954C23b15436073Ec694";
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 
@@ -48,14 +48,14 @@ const CreateABox = () => {
         assetType: 4,
         assetID: 0,
         assetQuantity: 0,
-        assetAddress: NULL_ADDRESS
+        assetAddress: ""
     });
 
     const [asset2, setAsset2] = useState<Asset_local>({
         assetType: 4,
         assetID: 0,
         assetQuantity: 0,
-        assetAddress: NULL_ADDRESS
+        assetAddress: ""
     });
 
     const handleAssest1Change = (e: any, id: "type" | "id" | "quantity" | "address") => {
