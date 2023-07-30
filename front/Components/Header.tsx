@@ -15,7 +15,7 @@ import { Box, Button, Center, Flex, HStack, Icon, Progress, Select, TagLabel, To
 
 import { injected } from '../pages/_app';
 import { CopyIcon } from '@chakra-ui/icons';
-import { trimAddress } from '../utils';
+import { handleNetworkChange, targetChain, trimAddress } from '../utils';
 
 
 type TOKEN = {
@@ -217,13 +217,26 @@ const Header = () => {
                     )
                 }
                 {
-                    active && account && (
+                    active && account && chainId == targetChain && (
                         <div>
                             <div>Account: {trimAddress(account)}</div>
                             <div>Chain Id: {chainId}</div>
                         </div>
                     )
                 }
+
+                {
+                    active && chainId != targetChain && (
+                        <Button
+                            onClick={handleNetworkChange}
+                            bgColor='blue.200'
+                            size="sm"
+                        >
+                            Switch Network
+                        </Button>
+                    )
+                }
+
             </Box>
 
         </Flex >
