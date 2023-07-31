@@ -16,6 +16,7 @@ import { Box, Button, Flex, HStack, Icon, Select, Tooltip, VStack } from '@chakr
 import { injected } from '../pages/_app';
 import { CopyIcon } from '@chakra-ui/icons';
 import { handleNetworkChange, targetChain, trimAddress } from '../utils';
+import Image from 'next/image';
 
 
 type ERC1155 = {
@@ -95,8 +96,8 @@ const Header = () => {
             <HStack border="0px solid red" w="full">
 
                 <a href={`https://sepolia.etherscan.io/address/${ERC20Address}`} target="_blank" rel="noreferrer">
-                    <img
-                        src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                    <Image
+                        src="/etherscan-logo-circle.png"
                         alt="EtherScan"
                         width="30px"
                         height="30px"
@@ -129,8 +130,8 @@ const Header = () => {
             <HStack border="0px solid red" w="full">
 
                 <a href={`https://sepolia.etherscan.io/address/${ERC721Address}`} target="_blank" rel="noreferrer">
-                    <img
-                        src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                    <Image
+                        src="/etherscan-logo-circle.png"
                         alt="EtherScan"
                         width="30px"
                         height="30px"
@@ -162,8 +163,8 @@ const Header = () => {
             <HStack border="0px solid red" w="full">
 
                 <a href={`https://sepolia.etherscan.io/address/${ERC1155Address}`} target="_blank" rel="noreferrer">
-                    <img
-                        src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                    <Image
+                        src="/etherscan-logo-circle.png"
                         alt="EtherScan"
                         width="30px"
                         height="30px"

@@ -1,5 +1,4 @@
 import { ApprovalStatus, AssetType, ClaimStatus, LockStatus, Status } from "../types";
-import Countdown from 'react-countdown';
 
 export const SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/6aaf945bb21340a5a0382fb45492ec39";
 export const targetChain = 11155111;
@@ -45,19 +44,6 @@ export const getAssetType = (asset: number) => {
 
 }
 
-export const getBoxStatus = (status: number) => {
-    if(status == Status.PENDING){
-        return "Pending";
-    }
-    if(status == Status.SUCCEED){
-        return "Succeed";
-    }
-    if(status == Status.FAILED){
-        return "Failed";
-    }
-}
-
-
 export const getAssetLockStatus = (status: number) => {
     if(status == LockStatus.LOCKED){
         return "Locked";
@@ -84,9 +70,3 @@ export const getAssetClaimStatus = (status: number) => {
         return "Not Claimed";
     }
 }
-
-
-
-// <Text> Approval Status {getBoxStatus(Number(box.assetA.lockStatus))} </Text>
-// <Text> Lock Status {getBoxStatus(Number(box.assetA.approvalStatus))} </Text>
-// <Text> Claim Status {getBoxStatus(Number(box.assetA.claimStatus))} </Text>

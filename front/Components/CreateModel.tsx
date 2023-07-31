@@ -22,9 +22,9 @@ import React, { useState } from "react";
 import { Asset, AssetType, NULL_ADDRESS, NULL_ASSET } from "../types";
 import { useWeb3React } from "@web3-react/core";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { LockBox } from "../Contracts/typechain-types";
+import { LockBox, TestNFT } from "../Contracts/typechain-types";
 import { Contract, ethers } from "ethers";
-import { LockBoxABI, LockBoxAddress } from "../Contracts";
+import { ERC721ABI, LockBoxABI, LockBoxAddress } from "../Contracts";
 
 
 const CreateModal = ({
@@ -38,6 +38,7 @@ const CreateModal = ({
   const { active, activate, deactivate, chainId,
     account, library: provider } = useWeb3React<JsonRpcProvider>();
 
+  const [isApproved, setIsApproved] = useState(false);
   const [asset1, setAsset1] = useState<Asset>(NULL_ASSET);
   const [asset2, setAsset2] = useState<Asset>(NULL_ASSET);
 
@@ -85,97 +86,18 @@ const CreateModal = ({
 
     if (provider) {
 
+      setLoading(true);
 
-
-      // if (asset1.type == AssetType.NFT) {
-
-      //   let asset1Type = AssetType.NFT;
-      //   let asset1Id = asset1.id;
-      //   let asset1Address = asset1.address;
-      //   let asset1Quantity = 1;
-
-      // }
-
-      // else if (asset1.type == AssetType.TOKEN) {
-
-      //   let asset1Type = AssetType.TOKEN;
-      //   let asset1Id = 0;
-      //   let asset1Address = asset1.address;
-      //   let asset1Quantity = asset1.quantity;
-
-      // }
-
-      // else if (asset1.type == AssetType.ERC1155) {
-
-      //   let asset1Type = AssetType.TOKEN;
-      //   let asset1Id = asset1.id;
-      //   let asset1Address = asset1.address;
-      //   let asset1Quantity = asset1.quantity;
-
-      // }
-
-      // else {
-
-      //   let asset1Type = AssetType.COIN;
-      //   let asset1Id = 0;
-      //   let asset1Address = NULL_ADDRESS;
-      //   let asset1Quantity = asset1.quantity;
-
-      // }
-
-
-      // if (asset2.type == AssetType.NFT) {
-
-      //   let asset2Type = AssetType.NFT;
-      //   let asset2Id = asset2.id;
-      //   let asset2Address = asset2.address;
-      //   let asset2Quantity = 0;
-
-      // }
-
-      // else if (asset2.type == AssetType.TOKEN) {
-
-      //   let asset2Type = AssetType.TOKEN;
-      //   let asset2Id = 0;
-      //   let asset2Address = asset2.address;
-      //   let asset2Quantity = asset2.quantity;
-
-      // }
-
-      // else if (asset2.type == AssetType.ERC1155) {
-
-      //   let asset2Type = AssetType.TOKEN;
-      //   let asset2Id = asset2.id;
-      //   let asset2Address = asset2.address;
-      //   let asset2Quantity = asset2.quantity;
-
-      // }
-
-      // else {
-
-      //   let asset2Type = AssetType.COIN;
-      //   let asset2Id = 0;
-      //   let asset2Address = NULL_ADDRESS;
-      //   let asset2Quantity = ethers.utils.parseEther(asset2.quantity.toString())
-
-      // }
-
-
-      // AssetType _assetAtype, address _assetAaddress, uint _assetAID, uint _assetAQuantity,
-      // AssetType _assetBtype, address _assetBaddress, uint _assetBID, uint _assetBQuantity,
-
-      // console.log("asset1Type => ", asset1Type);
-      // console.log("asset1Address => ", asset1Address);
-      // console.log("asset1Id => ", asset1Id);
-      // console.log("asset1Quantity => ", asset1Quantity);
+      const signer = provider.getSigner();
+      const LockBoxContract = new Contract(LockBoxAddress, LockBoxABI, signer) as LockBox;
+      const fee = await LockBoxContract.getLockBoxFee();
 
 
       if (asset1.type == AssetType.NFT && asset2.type == AssetType.COIN) {
-        setLoading(true);
+
+        // Approve the token so it can be fetched by LockBox
 
         try {
-          const signer = provider.getSigner();
-          const LockBoxContract = new Contract(LockBoxAddress, LockBoxABI, signer) as LockBox;
 
           const tx = await LockBoxContract.createLockBox(
             asset1.type,
@@ -189,6 +111,7 @@ const CreateModal = ({
             ethers.utils.parseEther(asset2.quantity.toString()),
 
             24 * 60 * 60,
+            { value: fee }
           );
 
           await tx.wait(1);
@@ -198,12 +121,9 @@ const CreateModal = ({
           console.error(e);
         }
 
-        setLoading(false);
-
       }
 
       if (asset1.type == AssetType.COIN && asset2.type == AssetType.NFT) {
-        setLoading(true);
 
         try {
           const signer = provider.getSigner();
@@ -215,13 +135,15 @@ const CreateModal = ({
             1,
             ethers.utils.parseEther(asset1.quantity.toString()),
 
-            asset1.type,
-            asset1.address,
-            asset1.id,
+            asset2.type,
+            asset2.address,
+            asset2.id,
             1,
 
 
             24 * 60 * 60,
+            { value: fee.add(ethers.utils.parseEther(asset1.quantity.toString())) }
+
           );
 
           await tx.wait(1);
@@ -231,12 +153,9 @@ const CreateModal = ({
           console.error(e);
         }
 
-        setLoading(false);
-
       }
 
       if (asset1.type == AssetType.NFT && asset2.type == AssetType.NFT) {
-        setLoading(true);
 
         try {
           const signer = provider.getSigner();
@@ -254,6 +173,8 @@ const CreateModal = ({
             1,
 
             24 * 60 * 60,
+            { value: fee }
+
           );
 
           await tx.wait(1);
@@ -263,9 +184,9 @@ const CreateModal = ({
           console.error(e);
         }
 
-        setLoading(false);
-
       }
+
+      setLoading(false);
 
 
     }
@@ -274,7 +195,54 @@ const CreateModal = ({
 
   }
 
+  const approveAsset = async () => {
 
+    if (provider && account) {
+      setLoading(true);
+
+
+      if (asset1.type == AssetType.NFT) {
+        try {
+          const signer = provider.getSigner();
+          const NFTContract = new Contract(asset1.address, ERC721ABI, signer) as TestNFT;
+          const approvedTo = await NFTContract.getApproved(asset1.id);
+
+          // console.log("approvedTo: ", approvedTo);
+
+          if (approvedTo != LockBoxAddress) {
+            const tx = await NFTContract.approve(LockBoxAddress, asset1.id,);
+            await tx.wait(1);
+          }
+          else {
+            setIsApproved(true);
+          }
+        }
+        catch (e) {
+          console.error(e);
+        }
+      }
+
+
+      else if (asset1.type == AssetType.COIN) {
+        try {
+          const balance = await provider.getBalance(account);
+          if (balance.lt(ethers.utils.parseEther(asset1.quantity.toString()))) {
+            alert("Insufficient balance")
+            return;
+          }
+          else {
+            setIsApproved(true);
+          }
+        }
+        catch (e) {
+          console.error(e);
+        }
+      }
+
+      setLoading(false);
+    }
+
+  }
 
   const Asset1InputArea = () => {
     return (
@@ -288,19 +256,21 @@ const CreateModal = ({
           <Select
             value={asset1.type}
             onChange={(e) => {
+              setIsApproved(false);
               setAsset1(NULL_ASSET);
+
               const val = Number(e.target.value);
               switch (val) {
-                case 0:
+                case AssetType.NFT:
                   setAsset1((e) => ({ ...e, type: AssetType.NFT }));
                   break;
-                case 1:
+                case AssetType.TOKEN:
                   setAsset1((e) => ({ ...e, type: AssetType.TOKEN }));
                   break;
-                case 2:
+                case AssetType.COIN:
                   setAsset1((e) => ({ ...e, type: AssetType.COIN }));
                   break;
-                case 3:
+                case AssetType.ERC1155:
                   setAsset1((e) => ({ ...e, type: AssetType.ERC1155 }));
                   break;
               }
@@ -413,16 +383,16 @@ const CreateModal = ({
               setAsset2(NULL_ASSET);
               const val = Number(e.target.value);
               switch (val) {
-                case 0:
+                case AssetType.NFT:
                   setAsset2((e) => ({ ...e, type: AssetType.NFT }));
                   break;
-                case 1:
+                case AssetType.TOKEN:
                   setAsset2((e) => ({ ...e, type: AssetType.TOKEN }));
                   break;
-                case 2:
+                case AssetType.COIN:
                   setAsset2((e) => ({ ...e, type: AssetType.COIN }));
                   break;
-                case 3:
+                case AssetType.ERC1155:
                   setAsset2((e) => ({ ...e, type: AssetType.ERC1155 }));
                   break;
               }
@@ -555,15 +525,32 @@ const CreateModal = ({
           </Flex>
 
           <ModalFooter color="black">
-            <Button
-              type="submit"
-              bgColor='blue.200'
-              size="sm"
-              onClick={handleCreate}
-              disabled={loading}
-            >
-              {loading ? loader : <Text>  Create  </Text>}
-            </Button>
+
+
+            {
+              !isApproved ? (
+                <Button
+                  type="submit"
+                  bgColor='blue.200'
+                  size="sm"
+                  onClick={approveAsset}
+                  disabled={loading}
+                >
+                  {loading ? loader : <Text>  Approve  </Text>}
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  bgColor='blue.200'
+                  size="sm"
+                  onClick={handleCreate}
+                  disabled={loading}
+                >
+                  {loading ? loader : <Text>  Create  </Text>}
+                </Button>
+              )
+            }
+
           </ModalFooter>
         </ModalBody>
       </ModalContent>

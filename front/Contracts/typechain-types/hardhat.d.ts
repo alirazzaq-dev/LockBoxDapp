@@ -137,6 +137,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.LockBox__factory>;
     getContractFactory(
+      name: "LockBoxV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.LockBoxV2__factory>;
+    getContractFactory(
       name: "TestERC1155",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestERC1155__factory>;
@@ -304,6 +308,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.LockBox>;
+    getContractAt(
+      name: "LockBoxV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.LockBoxV2>;
     getContractAt(
       name: "TestERC1155",
       address: string,

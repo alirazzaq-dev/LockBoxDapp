@@ -16,337 +16,221 @@ contract LockBox is Ownable, ERC721Holder, ERC1155Holder {
     error LockBox__NOT_PENDING_ANYMORE();
     error LockBox__EXPIRED();
     error LockBox__INSUFFICIENT_FUNDS();
+    error LockBox__NOT_AVAILABLE();
+    error LockBox__OUT_OF_BOUND_REQUEST();
+    error LockBox__INSUFFICIENT_LOCKING_FUNDS();
+    error LockBox__EXPIRY_LIMIT_EXCEEDING();
+    error LockBox__INSUFFICIENT_FUNDS_FOR_SWAP();
 
-    uint public counter;
-    uint public boxFee = 0.1 ether;
+    uint256 private s_expiryTime = 1 days;
+    uint256 private s_counter;
+    uint256 private s_boxFee = 0.01 ether;
+    mapping (uint256 => LockBoxInfo) private s_lockBoxInfo;
 
-    mapping (uint => LockBoxInfo) public lockBoxInfo;
 
     enum AssetType {NFT, TOKEN, COIN, ERC1155}
-    enum Status {PENDING, SUCCEED, FAILED}
-    enum ClaimStatus {NOT_CLAIMED, CLAIMED}
-    enum LockStatus {NOT_LOCKED, LOCKED}
-    enum ApprovalStatus {NOT_APPROVED, APPROVED}
+    enum Status {PENDING, SUCCEED, CANCELLED}
 
-    modifier onlyLockboxUsers(uint _id) {
-        if(_msgSender() != lockBoxInfo[_id].assetA.owner && _msgSender() != lockBoxInfo[_id].assetB.owner){
-            revert LockBox__NOT_ALLOWED();
-        }
-        _;
-    }
-
-    modifier onlyLockboxOwner(uint _id) {
-        if(_msgSender() != lockBoxInfo[_id].lockBoxOwner){
-            revert LockBox__NOT_ALLOWED();
-        }
-        _;
-    }
-
-    modifier isLockBoxValid(uint _id){
-        if(lockBoxInfo[_id].status != Status.PENDING){
-            revert LockBox__NOT_PENDING_ANYMORE();
-        }
-        if(block.timestamp >= lockBoxInfo[_id].expiryTime){
-            revert LockBox__EXPIRED();
-        }
-        _;
-    }
 
     struct Asset {
         AssetType assetType;
-        address owner;
         address assetAddress;
         uint assetID;
         uint assetQuantity;
-        LockStatus lockStatus;
-        ApprovalStatus approvalStatus;
-        ClaimStatus claimStatus;
-        address claimedBy;
     }
 
     struct LockBoxInfo {
-        address lockBoxOwner;
-        uint expiryTime;
+        uint256 boxId;
+        address owner;
+        uint256 expiryTime;
         Status status;
         Asset assetA;
         Asset assetB;
+        address claimedBy;
     }
 
+
     function createLockBox(
-        AssetType _assetAtype, address _assetAaddress, uint _assetAID, uint _assetAQuantity,
-        AssetType _assetBtype, address _assetBaddress, uint _assetBID, uint _assetBQuantity,
-        uint _expiryTime
+        AssetType assetAtype, address assetAaddress, uint256 assetAID, uint256 assetAQuantity,
+        AssetType assetBtype, address assetBaddress, uint256 assetBID, uint256 assetBQuantity,
+        uint256 expiryTime
         ) public payable {
         
-        if(msg.value < boxFee){
+
+        if(msg.value < s_boxFee){
             revert LockBox__INSUFFICIENT_FUNDS();
         }
 
-        require(
-            _expiryTime > 0 && 
-            _expiryTime <= 1 days, 
-            "Expiry time should be more than now and less than one day"
-            );
+        if(expiryTime > s_expiryTime){
+            revert LockBox__EXPIRY_LIMIT_EXCEEDING();
+        } 
 
-        counter++;
-
-        Asset memory _assetA = Asset (
-            _assetAtype, 
-            msg.sender,
-            _assetAaddress,
-            _assetAID,
-            _assetAQuantity,
-            LockStatus.NOT_LOCKED,
-            ApprovalStatus.NOT_APPROVED,
-            ClaimStatus.NOT_CLAIMED,
-            address(0)
-        );
-
-        Asset memory _assetB = Asset (
-            _assetBtype, 
-            address(0),
-            _assetBaddress,
-            _assetBID,
-            _assetBQuantity,
-            LockStatus.NOT_LOCKED,
-            ApprovalStatus.NOT_APPROVED,
-            ClaimStatus.NOT_CLAIMED,
-            address(0)
-        );
-
-        LockBoxInfo memory _lockBox =  LockBoxInfo (
-            msg.sender,
-            block.timestamp + _expiryTime,
-            Status.PENDING,
-            _assetA,
-            _assetB
-        );
-
-
-        lockBoxInfo[counter] = _lockBox;
     
+        if(assetAtype == AssetType.NFT) {
+            IERC721(assetAaddress).transferFrom(msg.sender, address(this), assetAID);
+        }
+        else if(assetAtype == AssetType.ERC1155) {
+            IERC1155(assetAaddress).safeTransferFrom(msg.sender, address(this), assetAID, assetAQuantity, "");
+        }
+        else if(assetAtype == AssetType.TOKEN) {
+            IERC20(assetAaddress).transferFrom(msg.sender, address(this), assetAQuantity);
+        }
+        else if(assetAtype == AssetType.COIN) {
+            if(msg.value < assetAQuantity + s_boxFee){
+                revert LockBox__INSUFFICIENT_LOCKING_FUNDS();
+            }
+        }
+
+
+        Asset memory assetA = Asset ({
+            assetType: assetAtype,
+            assetAddress: assetAaddress,
+            assetID: assetAID,
+            assetQuantity: assetAQuantity
+        });
+
+        Asset memory assetB = Asset ({
+            assetType: assetBtype,
+            assetAddress: assetBaddress,
+            assetID: assetBID,
+            assetQuantity: assetBQuantity
+        });
+
+        uint256 id = ++s_counter;
+
+        LockBoxInfo memory lockBox =  LockBoxInfo ({
+            boxId: id,
+            owner: msg.sender,
+            expiryTime: block.timestamp + expiryTime,
+            status: Status.PENDING,
+            assetA: assetA,
+            assetB: assetB,
+            claimedBy: address(0)
+        });
+
+        s_lockBoxInfo[id] = lockBox;
+   
     }
 
-    function lockAsset(uint _id) public payable isLockBoxValid(_id){
-
-        LockBoxInfo memory _lockBox = lockBoxInfo[_id];
+    function swapAssets(uint256 boxId) public payable {
         
-        if(msg.sender == _lockBox.assetA.owner){
-            require(_lockBox.assetA.lockStatus == LockStatus.NOT_LOCKED, "Asset is already locked" );
+        LockBoxInfo memory lockBox = s_lockBoxInfo[boxId];
+        Asset memory assetA = lockBox.assetA;
+        Asset memory assetB = lockBox.assetB;
 
-                    // Submit Asset A
-            if(_lockBox.assetA.assetType == AssetType.NFT) {
-                IERC721(_lockBox.assetA.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetA.assetID);
-                lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
-            }
-            else if(_lockBox.assetA.assetType == AssetType.ERC1155) {
-                IERC1155(_lockBox.assetA.assetAddress).safeTransferFrom(msg.sender, address(this), _lockBox.assetA.assetID, 1, "");
-                lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
-            }
-            else if(_lockBox.assetA.assetType == AssetType.TOKEN) {
-                IERC20(_lockBox.assetA.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetA.assetQuantity);
-                lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
-            }
-            else if(_lockBox.assetA.assetType == AssetType.COIN) {
-                require(msg.value >= _lockBox.assetA.assetQuantity, "Insufficient locking funds" );
-                lockBoxInfo[_id].assetA.lockStatus = LockStatus.LOCKED;
-            }
+        if(block.timestamp >= lockBox.expiryTime){
+            revert LockBox__EXPIRED();
         }
 
-        else {
-            require(_lockBox.assetB.lockStatus == LockStatus.NOT_LOCKED, "Asset is already locked" );
-
-            lockBoxInfo[_id].assetB.owner = msg.sender;
-
-
-            if(_lockBox.assetB.assetType == AssetType.NFT) {
-                IERC721(_lockBox.assetB.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetB.assetID);
-                lockBoxInfo[_id].assetB.lockStatus = LockStatus.LOCKED;
-            }
-            else if(_lockBox.assetB.assetType == AssetType.ERC1155) {
-                IERC1155(_lockBox.assetB.assetAddress).safeTransferFrom(msg.sender, address(this), _lockBox.assetB.assetID, 1, "");
-                lockBoxInfo[_id].assetB.lockStatus = LockStatus.LOCKED;
-            }
-            else if(_lockBox.assetB.assetType == AssetType.TOKEN) {
-                IERC20(_lockBox.assetB.assetAddress).transferFrom(msg.sender, address(this), _lockBox.assetB.assetQuantity);
-                lockBoxInfo[_id].assetB.lockStatus = LockStatus.LOCKED;
-
-            }
-            else if(_lockBox.assetB.assetType == AssetType.COIN) {
-                require(msg.value >= _lockBox.assetB.assetQuantity, "Insufficient locking funds" );
-                lockBoxInfo[_id].assetB.lockStatus = LockStatus.LOCKED;
-            }
-
-        }
-            
-
-    }
-
-    function approveAsset(uint _id) public onlyLockboxUsers(_id) isLockBoxValid(_id){
-
-        LockBoxInfo memory _lockBox = lockBoxInfo[_id];
-        
-        if(msg.sender == _lockBox.assetA.owner){
-            
-            require(_lockBox.assetA.lockStatus == LockStatus.LOCKED, "Asset id not locked" );
-            require(_lockBox.assetA.approvalStatus == ApprovalStatus.NOT_APPROVED, "Asset is already approved");
-            
-            lockBoxInfo[_id].assetA.approvalStatus = ApprovalStatus.APPROVED;
-
-            if(_lockBox.assetB.approvalStatus == ApprovalStatus.APPROVED){
-                lockBoxInfo[_id].status = Status.SUCCEED;
-            }
-
+        if(lockBox.status != Status.PENDING){
+            revert LockBox__NOT_AVAILABLE();
         }
 
-        else if(msg.sender == _lockBox.assetB.owner){
-
-            require(_lockBox.assetB.lockStatus == LockStatus.LOCKED, "Asset id not locked" );
-            require(_lockBox.assetB.approvalStatus == ApprovalStatus.NOT_APPROVED, "Asset is already approved");
-            
-            lockBoxInfo[_id].assetB.approvalStatus = ApprovalStatus.APPROVED;
-
-            if(_lockBox.assetA.approvalStatus == ApprovalStatus.APPROVED){
-                lockBoxInfo[_id].status = Status.SUCCEED;
-            }
+    
+        if(assetB.assetType == AssetType.NFT) {
+            IERC721(assetB.assetAddress).transferFrom(msg.sender, lockBox.owner, assetB.assetID);
         }
-
+        else if(assetB.assetType == AssetType.ERC1155) {
+            IERC1155(assetB.assetAddress).safeTransferFrom(msg.sender, lockBox.owner, assetB.assetID, assetB.assetQuantity, "");
+        }
+        else if(assetB.assetType == AssetType.TOKEN) {
+            IERC20(assetB.assetAddress).transferFrom(msg.sender, lockBox.owner, assetB.assetQuantity);
+        }
+        else if(assetB.assetType == AssetType.COIN) {
+            if(msg.value < assetB.assetQuantity){
+                revert LockBox__INSUFFICIENT_FUNDS_FOR_SWAP();
+            }
+            payable(lockBox.owner).transfer(assetB.assetQuantity);
+            
+        }
 
         
-    }
-    
-    function claimAsset(uint _id) public  onlyLockboxUsers(_id) {
-
-        if(block.timestamp >= lockBoxInfo[_id].expiryTime){
-            lockBoxInfo[_id].status = Status.FAILED;
+        if(assetA.assetType == AssetType.NFT) {
+            IERC721(assetA.assetAddress).transferFrom(address(this), msg.sender, assetA.assetID);
+        }
+        else if(assetA.assetType == AssetType.ERC1155) {
+            IERC1155(assetA.assetAddress).safeTransferFrom(address(this), msg.sender, assetA.assetID, assetA.assetQuantity, "");
+        }
+        else if(assetA.assetType == AssetType.TOKEN) {
+            IERC20(assetA.assetAddress).transferFrom(address(this), msg.sender, assetA.assetQuantity);
+        }
+        else if(assetA.assetType == AssetType.COIN) {
+            payable(msg.sender).transfer(assetA.assetQuantity);
         }
 
-        LockBoxInfo memory _lockBox = lockBoxInfo[_id];
-
-        require( _lockBox.status != Status.PENDING, "Nothing to claim" );
-
-        if(msg.sender == _lockBox.assetA.owner) {
-
-            if(_lockBox.status == Status.SUCCEED){
-                // require( _lockBox.assetB.claimStatus == ClaimStatus.NOT_CLAIMED, "Asset B is already claimed" );
-                // require( _lockBox.assetB.lockStatus == LockStatus.LOCKED, "Asset B is not locked" );
-                // require( _lockBox.assetB.approvalStatus == ApprovalStatus.APPROVED, "Asset B is not approved" );
-
-                lockBoxInfo[_id].assetB.claimedBy = msg.sender;
-                lockBoxInfo[_id].assetB.claimStatus = ClaimStatus.CLAIMED;
-
-                if(_lockBox.assetB.assetType == AssetType.NFT) {
-                    IERC721(_lockBox.assetB.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetB.assetID);
-                }
-                else if(_lockBox.assetB.assetType == AssetType.ERC1155) {
-                    IERC1155(_lockBox.assetB.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetB.assetID, 1, "");
-                }
-                else if(_lockBox.assetB.assetType == AssetType.TOKEN) {
-                    IERC20(_lockBox.assetB.assetAddress).transfer(msg.sender, _lockBox.assetB.assetQuantity);
-                }
-                else if(_lockBox.assetB.assetType == AssetType.COIN) {
-                    payable(_lockBox.assetA.owner).transfer(_lockBox.assetB.assetQuantity);
-                }
-            }
-
-            else if(_lockBox.status == Status.FAILED){
-                
-                require( _lockBox.assetA.lockStatus == LockStatus.LOCKED, "Asset A is not locked" );
-                require( _lockBox.assetA.claimStatus == ClaimStatus.NOT_CLAIMED, "Asset A is already claimed" );
-                // require( _lockBox.assetA.approvalStatus == ApprovalStatus.APPROVED, "Asset A is not approved" );
-    
-                lockBoxInfo[_id].assetA.claimedBy = msg.sender;
-                lockBoxInfo[_id].assetA.claimStatus = ClaimStatus.CLAIMED;
-
-                if(_lockBox.assetA.assetType == AssetType.NFT) {
-                    IERC721(_lockBox.assetA.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetA.assetID);
-                }
-                else if(_lockBox.assetA.assetType == AssetType.ERC1155) {
-                    IERC1155(_lockBox.assetA.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetA.assetID, 1, "");
-                }
-                else if(_lockBox.assetA.assetType == AssetType.TOKEN) {
-                    IERC20(_lockBox.assetA.assetAddress).transfer(msg.sender, _lockBox.assetA.assetQuantity);
-                }
-                else if(_lockBox.assetA.assetType == AssetType.COIN) {
-                    payable(_lockBox.assetA.owner).transfer(_lockBox.assetA.assetQuantity);
-                }
-
-            }
-
-            else if(_lockBox.status == Status.PENDING) {
-                require( _lockBox.assetA.lockStatus == LockStatus.LOCKED, "Asset A is not locked" );
-
-            }
-
-        }
-
-        else if(msg.sender == _lockBox.assetB.owner) {
-            
-            if(_lockBox.status == Status.SUCCEED) {
-                
-                // require( _lockBox.assetA.claimStatus == ClaimStatus.NOT_CLAIMED, "Asset A is already claimed" );
-                // require( _lockBox.assetA.lockStatus == LockStatus.LOCKED, "Asset A is not locked" );
-                // require( _lockBox.assetA.approvalStatus == ApprovalStatus.APPROVED, "Asset A is not approved" );
-
-                lockBoxInfo[_id].assetA.claimedBy = msg.sender;
-                lockBoxInfo[_id].assetA.claimStatus = ClaimStatus.CLAIMED;
-
-                if(_lockBox.assetA.assetType == AssetType.NFT) {
-                    IERC721(_lockBox.assetA.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetA.assetID);
-                }
-                else if(_lockBox.assetA.assetType == AssetType.ERC1155) {
-                    IERC1155(_lockBox.assetA.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetA.assetID, 1, "");
-                }
-                else if(_lockBox.assetA.assetType == AssetType.TOKEN) {
-                    IERC20(_lockBox.assetA.assetAddress).transfer(msg.sender, _lockBox.assetA.assetQuantity);
-                }
-                else if(_lockBox.assetA.assetType == AssetType.COIN) {
-                    payable(_lockBox.assetB.owner).transfer(_lockBox.assetA.assetQuantity);
-                }
-
-            }
-
-            else if(_lockBox.status == Status.FAILED) {
-
-                require( _lockBox.assetB.claimStatus == ClaimStatus.NOT_CLAIMED, "Asset B is already claimed" );
-                require( _lockBox.assetB.lockStatus == LockStatus.LOCKED, "Asset B is not locked" );
-
-                lockBoxInfo[_id].assetB.claimStatus = ClaimStatus.CLAIMED;
-                lockBoxInfo[_id].assetB.claimedBy = msg.sender;
-
-                if(_lockBox.assetB.assetType == AssetType.NFT) {
-                    IERC721(_lockBox.assetB.assetAddress).transferFrom(address(this), msg.sender, _lockBox.assetB.assetID);
-                }
-                else if(_lockBox.assetB.assetType == AssetType.ERC1155) {
-                    IERC1155(_lockBox.assetB.assetAddress).safeTransferFrom(address(this), msg.sender, _lockBox.assetB.assetID, 1, "");
-                }
-                else if(_lockBox.assetB.assetType == AssetType.TOKEN) {
-                    IERC20(_lockBox.assetB.assetAddress).transfer(msg.sender, _lockBox.assetB.assetQuantity);
-                }
-                else if(_lockBox.assetB.assetType == AssetType.COIN) {
-                    payable(_lockBox.assetB.owner).transfer(_lockBox.assetB.assetQuantity);
-                }
-
-            }
-
-        }
-
+        s_lockBoxInfo[boxId].claimedBy = msg.sender;
+        s_lockBoxInfo[boxId].status = Status.SUCCEED;
+        
 
     }
 
-    function cancelLockBox(uint _id) public onlyLockboxOwner(_id) isLockBoxValid(_id) {
-        LockBoxInfo memory _lockBox = lockBoxInfo[_id];
-                
-        require(
-            _lockBox.assetA.approvalStatus == ApprovalStatus.NOT_APPROVED ||
-            _lockBox.assetB.approvalStatus == ApprovalStatus.NOT_APPROVED ,
-             "Cannot cancel the lockbox now"
-        );
+    function cancelLockBox(uint256 boxId) public {
 
-        lockBoxInfo[_id].status = Status.FAILED;
+        LockBoxInfo memory lockBox = s_lockBoxInfo[boxId];
+        Asset memory assetA = lockBox.assetA;
+
+
+        require( msg.sender == lockBox.owner, "Already claimed by someone");
+        require( lockBox.claimedBy == address(0), "Already claimed by someone");
+
+
+        if(assetA.assetType == AssetType.NFT) {
+            IERC721(assetA.assetAddress).transferFrom(address(this), lockBox.owner, assetA.assetID);
+        }
+        else if(assetA.assetType == AssetType.ERC1155) {
+            IERC1155(assetA.assetAddress).safeTransferFrom(address(this), lockBox.owner, assetA.assetID, assetA.assetQuantity, "");
+        }
+        else if(assetA.assetType == AssetType.TOKEN) {
+            IERC20(assetA.assetAddress).transferFrom(address(this), lockBox.owner, assetA.assetQuantity);
+        }
+        else if(assetA.assetType == AssetType.COIN) {
+            payable(lockBox.owner).transfer(assetA.assetQuantity);
+        }
+
+        s_lockBoxInfo[boxId].status = Status.CANCELLED;
 
     }
 
+
+    /* Getters */
+    function getLockBoxCount() public view returns(uint) {
+        return s_counter;
+    }
+
+    function getLockBoxInfo(uint256 boxId) public view returns(LockBoxInfo memory) {
+        return s_lockBoxInfo[boxId];
+    }
+
+    function getLockBoxesInfo(uint256 from, uint256 count) public view returns(LockBoxInfo[] memory) {
+
+        if (from > s_counter) {
+            revert LockBox__OUT_OF_BOUND_REQUEST();
+        }
+
+        if (count > from) {
+            count = from;
+        }
+
+        uint256 to = from - count;
+
+        uint256 index = 0;
+        LockBoxInfo[] memory lockBoxes = new LockBoxInfo[](count);
+        
+        for (uint256 i = from; i > to; i--) {
+            lockBoxes[index] = s_lockBoxInfo[i];
+            index++;
+        }
+
+        return lockBoxes;
+
+    }
+
+    function getLockBoxFee() public view returns(uint) {
+        return s_boxFee;
+    }
+
+
+    /* Only owner */
     function withdrawFunds() public onlyOwner {
         uint balance = address(this).balance;
         require(balance > 0, "Balance is zero");
@@ -354,7 +238,7 @@ contract LockBox is Ownable, ERC721Holder, ERC1155Holder {
     }
 
     function updateBoxFee(uint _fee) public onlyOwner {
-        boxFee = _fee;
+        s_boxFee = _fee;
     }
 
 }

@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { LockBox } from "./LockBox";
+export type { LockBoxV2 } from "./LockBoxV2";
 export type { TestERC1155 } from "./TestERC1155";
 export type { TestNFT } from "./TestNFT";
 export type { TestToken } from "./TestToken";

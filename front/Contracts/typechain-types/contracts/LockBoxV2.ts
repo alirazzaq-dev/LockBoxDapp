@@ -28,7 +28,7 @@ import type {
   PromiseOrValue,
 } from "../common";
 
-export declare namespace LockBox {
+export declare namespace LockBoxV2 {
   export type AssetStruct = {
     assetType: PromiseOrValue<BigNumberish>;
     assetAddress: PromiseOrValue<string>;
@@ -48,8 +48,8 @@ export declare namespace LockBox {
     owner: PromiseOrValue<string>;
     expiryTime: PromiseOrValue<BigNumberish>;
     status: PromiseOrValue<BigNumberish>;
-    assetA: LockBox.AssetStruct;
-    assetB: LockBox.AssetStruct;
+    assetA: LockBoxV2.AssetStruct;
+    assetB: LockBoxV2.AssetStruct;
     claimedBy: PromiseOrValue<string>;
   };
 
@@ -58,21 +58,21 @@ export declare namespace LockBox {
     string,
     BigNumber,
     number,
-    LockBox.AssetStructOutput,
-    LockBox.AssetStructOutput,
+    LockBoxV2.AssetStructOutput,
+    LockBoxV2.AssetStructOutput,
     string
   ] & {
     boxId: BigNumber;
     owner: string;
     expiryTime: BigNumber;
     status: number;
-    assetA: LockBox.AssetStructOutput;
-    assetB: LockBox.AssetStructOutput;
+    assetA: LockBoxV2.AssetStructOutput;
+    assetB: LockBoxV2.AssetStructOutput;
     claimedBy: string;
   };
 }
 
-export interface LockBoxInterface extends utils.Interface {
+export interface LockBoxV2Interface extends utils.Interface {
   functions: {
     "cancelLockBox(uint256)": FunctionFragment;
     "createLockBox(uint8,address,uint256,uint256,uint8,address,uint256,uint256,uint256)": FunctionFragment;
@@ -279,12 +279,12 @@ export type OwnershipTransferredEvent = TypedEvent<
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
-export interface LockBox extends BaseContract {
+export interface LockBoxV2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: LockBoxInterface;
+  interface: LockBoxV2Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -331,13 +331,13 @@ export interface LockBox extends BaseContract {
     getLockBoxInfo(
       boxId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[LockBox.LockBoxInfoStructOutput]>;
+    ): Promise<[LockBoxV2.LockBoxInfoStructOutput]>;
 
     getLockBoxesInfo(
       from: PromiseOrValue<BigNumberish>,
       count: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<[LockBox.LockBoxInfoStructOutput[]]>;
+    ): Promise<[LockBoxV2.LockBoxInfoStructOutput[]]>;
 
     onERC1155BatchReceived(
       arg0: PromiseOrValue<string>,
@@ -421,13 +421,13 @@ export interface LockBox extends BaseContract {
   getLockBoxInfo(
     boxId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
-  ): Promise<LockBox.LockBoxInfoStructOutput>;
+  ): Promise<LockBoxV2.LockBoxInfoStructOutput>;
 
   getLockBoxesInfo(
     from: PromiseOrValue<BigNumberish>,
     count: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
-  ): Promise<LockBox.LockBoxInfoStructOutput[]>;
+  ): Promise<LockBoxV2.LockBoxInfoStructOutput[]>;
 
   onERC1155BatchReceived(
     arg0: PromiseOrValue<string>,
@@ -511,13 +511,13 @@ export interface LockBox extends BaseContract {
     getLockBoxInfo(
       boxId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<LockBox.LockBoxInfoStructOutput>;
+    ): Promise<LockBoxV2.LockBoxInfoStructOutput>;
 
     getLockBoxesInfo(
       from: PromiseOrValue<BigNumberish>,
       count: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<LockBox.LockBoxInfoStructOutput[]>;
+    ): Promise<LockBoxV2.LockBoxInfoStructOutput[]>;
 
     onERC1155BatchReceived(
       arg0: PromiseOrValue<string>,

@@ -1,5 +1,4 @@
 import { Box } from '@chakra-ui/react'
-import Image from 'next/image'
 import Header from '../Components/Header'
 import Create from '../Components/Create'
 import LockBoxs from '../Components/LockBoxs'
