@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export { LockBox__factory } from "./LockBox__factory";
+export { LockBoxV2__factory } from "./LockBoxV2__factory";
 export { TestERC1155__factory } from "./TestERC1155__factory";
 export { TestNFT__factory } from "./TestNFT__factory";
 export { TestToken__factory } from "./TestToken__factory";

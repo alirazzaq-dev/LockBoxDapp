@@ -68,6 +68,8 @@ export type { IERC165 } from "./@openzeppelin/contracts/utils/introspection/IERC
 export { IERC165__factory } from "./factories/@openzeppelin/contracts/utils/introspection/IERC165__factory";
 export type { LockBox } from "./contracts/LockBox";
 export { LockBox__factory } from "./factories/contracts/LockBox__factory";
+export type { LockBoxV2 } from "./contracts/LockBoxV2";
+export { LockBoxV2__factory } from "./factories/contracts/LockBoxV2__factory";
 export type { TestERC1155 } from "./contracts/TestERC1155";
 export { TestERC1155__factory } from "./factories/contracts/TestERC1155__factory";
 export type { TestNFT } from "./contracts/TestNFT";
