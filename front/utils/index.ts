@@ -1,3 +1,6 @@
+import { ApprovalStatus, AssetType, ClaimStatus, LockStatus, Status } from "../types";
+import Countdown from 'react-countdown';
+
 export const SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/6aaf945bb21340a5a0382fb45492ec39";
 export const targetChain = 11155111;
 
@@ -25,3 +28,65 @@ export const handleNetworkChange = async () => {
     }
     /// Reference: https://stackoverflow.com/questions/68252365/how-to-trigger-change-blockchain-network-request-on-metamask
 };
+
+export const getAssetType = (asset: number) => {
+    if(asset == AssetType.NFT){
+        return "ERC721 NFT";
+    }
+    if(asset == AssetType.ERC1155){
+        return "ERC1155 NFT";
+    }
+    if(asset == AssetType.TOKEN){
+        return "ERC20 Token";
+    }
+    if(asset == AssetType.COIN){
+        return "Coin";
+    }
+
+}
+
+export const getBoxStatus = (status: number) => {
+    if(status == Status.PENDING){
+        return "Pending";
+    }
+    if(status == Status.SUCCEED){
+        return "Succeed";
+    }
+    if(status == Status.FAILED){
+        return "Failed";
+    }
+}
+
+
+export const getAssetLockStatus = (status: number) => {
+    if(status == LockStatus.LOCKED){
+        return "Locked";
+    }
+    if(status == LockStatus.NOT_LOCKED){
+        return "Not Locked";
+    }
+}
+
+export const getAssetApprovalStatus = (status: number) => {
+    if(status == ApprovalStatus.APPROVED){
+        return "Approved";
+    }
+    if(status == ApprovalStatus.NOT_APPROVED){
+        return "Not Approved";
+    }
+}
+
+export const getAssetClaimStatus = (status: number) => {
+    if(status == ClaimStatus.CLAIMED){
+        return "Claimed";
+    }
+    if(status == ClaimStatus.NOT_CLAIMED){
+        return "Not Claimed";
+    }
+}
+
+
+
+// <Text> Approval Status {getBoxStatus(Number(box.assetA.lockStatus))} </Text>
+// <Text> Lock Status {getBoxStatus(Number(box.assetA.approvalStatus))} </Text>
+// <Text> Claim Status {getBoxStatus(Number(box.assetA.claimStatus))} </Text>

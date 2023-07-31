@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { ethers, Contract } from "ethers";
 import { useWeb3React } from "@web3-react/core";
-import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 import {
     ERC1155ABI, ERC1155Address, ERC20ABI, ERC20Address, ERC721ABI, ERC721Address
@@ -11,26 +11,18 @@ import {
 import { TestNFT, TestToken } from '@/Contracts/typechain-types';
 import { TestERC1155 } from '@/Contracts/typechain-types/contracts/TestERC1155.sol';
 
-import { Box, Button, Center, Flex, HStack, Icon, Progress, Select, TagLabel, Tooltip, VStack } from '@chakra-ui/react';
+import { Box, Button, Flex, HStack, Icon, Select, Tooltip, VStack } from '@chakra-ui/react';
 
 import { injected } from '../pages/_app';
 import { CopyIcon } from '@chakra-ui/icons';
 import { handleNetworkChange, targetChain, trimAddress } from '../utils';
 
 
-type TOKEN = {
-    count: string;
-    contract: null | TestToken;
-    minting: boolean
-
-}
-
 type ERC1155 = {
     id: number,
     contract: null | TestERC1155;
     minting: boolean
 }
-
 
 const Header = () => {
 
@@ -65,11 +57,11 @@ const Header = () => {
 
     const mint = async (id: "ERC721" | "ERC20" | "ERC1155") => {
 
-        if (!account) {
+        if (!account || !provider) {
             await activate(injected);
+            return;
         }
 
-        const provider = new Web3Provider((window as any).ethereum);
         const signer = provider.getSigner();
 
         if (id === "ERC721" && account) {
@@ -98,109 +90,125 @@ const Header = () => {
 
     }
 
+    const MintERC20 = () => {
+        return (
+            <HStack border="0px solid red" w="full">
+
+                <a href={`https://sepolia.etherscan.io/address/${ERC20Address}`} target="_blank" rel="noreferrer">
+                    <img
+                        src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                        alt="EtherScan"
+                        width="30px"
+                        height="30px"
+                    />
+                </a>
+
+                <Tooltip title="Copy token address">
+                    <Icon as={CopyIcon}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => { navigator.clipboard.writeText(ERC20Address) }}
+                    />
+                </Tooltip>
+
+                <Button
+                    onClick={() => mint("ERC20")}
+                    bgColor='blue.200'
+                    size="sm"
+                >
+                    Mint Tokens
+                </Button>
+
+
+            </HStack>
+
+        )
+    }
+
+    const MintERC721 = () => {
+        return (
+            <HStack border="0px solid red" w="full">
+
+                <a href={`https://sepolia.etherscan.io/address/${ERC721Address}`} target="_blank" rel="noreferrer">
+                    <img
+                        src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                        alt="EtherScan"
+                        width="30px"
+                        height="30px"
+                    />
+                </a>
+
+                <Tooltip title="Copy token address">
+                    <Icon as={CopyIcon}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => { navigator.clipboard.writeText(ERC721Address) }}
+                    />
+                </Tooltip>
+
+                <Button
+                    onClick={() => mint("ERC721")}
+                    bgColor='blue.200'
+                    size="sm"
+                >
+                    Mint An NFT
+                </Button>
+
+
+            </HStack>
+        )
+    }
+
+    const MintERC1155 = () => {
+        return (
+            <HStack border="0px solid red" w="full">
+
+                <a href={`https://sepolia.etherscan.io/address/${ERC1155Address}`} target="_blank" rel="noreferrer">
+                    <img
+                        src="https://potatoheadsnft.com/assets/img/etherscan.png"
+                        alt="EtherScan"
+                        width="30px"
+                        height="30px"
+                    />
+                </a>
+
+                <Tooltip title="Copy token address">
+                    <Icon as={CopyIcon}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => { navigator.clipboard.writeText(ERC1155Address) }}
+                    />
+                </Tooltip>
+
+                <Select
+                    w="80px"
+                    value={erc1155.id}
+                    onChange={(e) => setID(e.target.value)}
+                >
+                    <option value="1">Id: 1</option>
+                    <option value="2">Id: 2</option>
+                    <option value="3">Id: 3</option>
+                    <option value="4">Id: 4</option>
+                    <option value="5">Id: 5</option>
+                </Select>
+
+                <Button
+                    onClick={() => mint("ERC1155")}
+                    bgColor='blue.200'
+                    size="sm"
+                >
+                    Mint An ERC1155 Token
+                </Button>
+
+            </HStack>
+
+        )
+    }
+
     return (
 
-        < Flex direction={{base: "column-reverse", lg:"row"}} border="0px solid red"  borderBottom="1px solid #dcdcdc" justify="space-between" p="20px">
+        < Flex direction={{ base: "column-reverse", lg: "row" }} border="0px solid red" borderBottom="1px solid #dcdcdc" justify="space-between" p="20px">
 
             <VStack>
 
-                <HStack border="0px solid red" w="full">
-
-                    <a href={`https://sepolia.etherscan.io/address/${ERC20Address}`} target="_blank" rel="noreferrer">
-                        <img
-                            src="https://potatoheadsnft.com/assets/img/etherscan.png"
-                            alt="EtherScan"
-                            width="30px"
-                            height="30px"
-                        />
-                    </a>
-
-                    <Tooltip title="Copy token address">
-                        <Icon as={CopyIcon}
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => { navigator.clipboard.writeText(ERC20Address) }}
-                        />
-                    </Tooltip>
-
-                    <Button
-                        onClick={() => mint("ERC20")}
-                        bgColor='blue.200'
-                        size="sm"
-                    >
-                        Mint Tokens
-                    </Button>
-
-
-                </HStack>
-
-                <HStack border="0px solid red" w="full">
-
-                    <a href={`https://sepolia.etherscan.io/address/${ERC721Address}`} target="_blank" rel="noreferrer">
-                        <img
-                            src="https://potatoheadsnft.com/assets/img/etherscan.png"
-                            alt="EtherScan"
-                            width="30px"
-                            height="30px"
-                        />
-                    </a>
-
-                    <Tooltip title="Copy token address">
-                        <Icon as={CopyIcon}
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => { navigator.clipboard.writeText(ERC721Address) }}
-                        />
-                    </Tooltip>
-
-                    <Button
-                        onClick={() => mint("ERC721")}
-                        bgColor='blue.200'
-                        size="sm"
-                    >
-                        Mint An NFT
-                    </Button>
-
-
-                </HStack>
-
-                <HStack border="0px solid red" w="full">
-
-                    <a href={`https://sepolia.etherscan.io/address/${ERC1155Address}`} target="_blank" rel="noreferrer">
-                        <img
-                            src="https://potatoheadsnft.com/assets/img/etherscan.png"
-                            alt="EtherScan"
-                            width="30px"
-                            height="30px"
-                        />
-                    </a>
-
-                    <Tooltip title="Copy token address">
-                        <Icon as={CopyIcon}
-                            sx={{ cursor: "pointer" }}
-                            onClick={() => { navigator.clipboard.writeText(ERC1155Address) }}
-                        />
-                    </Tooltip>
-
-                    <Select
-                        w="80px"
-                        value={erc1155.id}
-                        onChange={(e) => setID(e.target.value)}
-                    >
-                        <option value="1">Id: 1</option>
-                        <option value="2">Id: 2</option>
-                        <option value="3">Id: 3</option>
-                        <option value="4">Id: 4</option>
-                        <option value="5">Id: 5</option>
-                    </Select>
-
-                    <Button
-                        onClick={() => mint("ERC1155")}
-                        bgColor='blue.200'
-                        size="sm"
-                    >
-                        Mint An ERC1155 Token
-                    </Button>
-
-                </HStack>
+                <MintERC721 />
 
             </VStack>
 
@@ -210,7 +218,7 @@ const Header = () => {
                         <Button
                             onClick={connect}
                             bgColor='blue.200'
-                            size="sm"    
+                            size="sm"
                         >
                             Connect
                         </Button>
